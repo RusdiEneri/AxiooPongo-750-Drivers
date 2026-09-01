@@ -3,7 +3,7 @@ name: Update Driver Metadata
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 * * * *"
 
 permissions:
   contents: write
@@ -51,8 +51,8 @@ jobs:
 
       - name: Commit updated version.json
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "RusdiEneri"
+          git config user.email "nuruddinrusydiilham@gmail.com"
 
           git add version.json
 
