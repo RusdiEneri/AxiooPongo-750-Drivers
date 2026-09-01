@@ -1,0 +1,21 @@
+{
+  "serial-io": {
+    "id": "serial-io",
+    "category": "SPECIAL",
+    "name": "Intel Serial IO",
+    "version": "30.100.2531.31",
+    "source": "microsoft-update-catalog",
+    "url": "https://catalog.s.download.windowsupdate.com/d/msdownload/update/driver/drvs/2025/11/fc633db2-319c-4acb-815c-877902b824ff_8e228ba0068deff3460565a3294e27cdd428ac5c.cab",
+    "hardware_ids": [
+      "PCI\\VEN_8086&DEV_51E8",
+      "ACPI\\INTC1055"
+    ],
+    "install": {
+      "type": "pnputil",
+      "inf": [
+        "iaLPSS2_GPIO2_ADL.inf",
+        "iaLPSS2_I2C_ADL.inf"
+      ]
+    }
+  }
+}
