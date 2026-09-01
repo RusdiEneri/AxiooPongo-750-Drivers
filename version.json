@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-09-01T00:00:00Z",
+  "model": "PONGO 750 NP50RNC1",
+  "drivers": {
+    "intel-graphics": "32.0.101.5768",
+    "audio": "6.0.9697.1",
+    "control-center": "6.093",
+    "nvidia": "55.99",
+    "wifi": "23.60.1.2",
+    "dtt": "9.0.11701.44281",
+    "speed-shift": "1003.20240522",
+    "gna": "03.05.00.1578",
+    "lan": "10.072.0524.2024",
+    "hid-filter": "2.2.2.10",
+    "intel-me": "2425.6.26.0",
+    "intel-chipset": "10.1.19899.8597",
+    "card-reader": "2.1.101.10700",
+    "bluetooth": "23.60.0.1",
+    "serial-io": "30.100.2531.31"
+  }
+}

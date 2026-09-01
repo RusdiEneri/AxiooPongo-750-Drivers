@@ -1,0 +1,144 @@
+{
+  "model": {
+    "brand": "Axioo",
+    "series": "PONGO",
+    "model": "750",
+    "code": "NP50RNC1"
+  },
+  "drivers": [
+    {
+      "id": "intel-graphics",
+      "category": "VGA",
+      "name": "Intel Graphic",
+      "version": "32.0.101.5768",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/VGA/Graphics_Intel_32.0.101.5768.zip",
+      "install": "package"
+    },
+    {
+      "id": "audio",
+      "category": "AUDIO",
+      "name": "Audio",
+      "version": "6.0.9697.1",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/AUDIO/Audio_6.0.9697.1.zip",
+      "install": "package"
+    },
+    {
+      "id": "control-center",
+      "category": "OTHERS",
+      "name": "Control Center 3.0",
+      "version": "6.093",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/OTHERS/08_CC30_v6.093_Win11_24H2.zip",
+      "install": "package"
+    },
+    {
+      "id": "nvidia",
+      "category": "VGA",
+      "name": "NVIDIA Graphic",
+      "version": "55.99",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/VGA/Graphics_NVIDIA_555.99.zip",
+      "install": "package"
+    },
+    {
+      "id": "wifi",
+      "category": "WIFI",
+      "name": "WiFi",
+      "version": "23.60.1.2",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/WIFI/Wifi_23_60_1_2.zip",
+      "install": "package"
+    },
+    {
+      "id": "dtt",
+      "category": "OTHERS",
+      "name": "DTT",
+      "version": "9.0.11701.44281",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/CHIPSET/DTT_9_0_11701_44281.zip",
+      "install": "package"
+    },
+    {
+      "id": "speed-shift",
+      "category": "OTHERS",
+      "name": "Speed Shift",
+      "version": "1003.20240522",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/OTHERS/SpeedShift_RPLH_1003_20240522.zip",
+      "install": "package"
+    },
+    {
+      "id": "gna",
+      "category": "OTHERS",
+      "name": "GNA",
+      "version": "03.05.00.1578",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/OTHERS/GNA_03_05_00_1578.zip",
+      "install": "package"
+    },
+    {
+      "id": "lan",
+      "category": "LAN",
+      "name": "LAN",
+      "version": "10.072.0524.2024",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/LAN/LAN_RTL_10_072_0524_2024.zip",
+      "install": "package"
+    },
+    {
+      "id": "hid-filter",
+      "category": "HID FILTER",
+      "name": "HID Event Filter",
+      "version": "2.2.2.10",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/HID_FILTER/HIDfilter_2_2_2_10.zip",
+      "install": "inf"
+    },
+    {
+      "id": "intel-me",
+      "category": "CHIPSET",
+      "name": "Intel Management Engine",
+      "version": "2425.6.26.0",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/CHIPSET/IME_2425.6.26.0.zip",
+      "install": "package"
+    },
+    {
+      "id": "intel-chipset",
+      "category": "CHIPSET",
+      "name": "Intel Chipset",
+      "version": "10.1.19899.8597",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/CHIPSET/Chipset_Intel_10_1_19899_8597.zip",
+      "install": "inf"
+    },
+    {
+      "id": "card-reader",
+      "category": "CARD READER",
+      "name": "Card Reader",
+      "version": "2.1.101.10700",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/CARD_READER/Cardreader_BayHub_2_1_101_10700.zipE",
+      "install": "package"
+    },
+    {
+      "id": "bluetooth",
+      "category": "BLUETOOTH",
+      "name": "Bluetooth",
+      "version": "23.60.0.1",
+      "source": "axioo",
+      "url": "https://driver.axiooworld.com/driver/BLUETOOTH/Bluetooth_23_60_0_1.zip",
+      "install": "package"
+    }
+  ],
+  "special": {
+    "serial-io": {
+      "name": "Intel Serial IO",
+      "version": "30.100.2531.31",
+      "source": "microsoft-update-catalog",
+      "url": "https://catalog.s.download.windowsupdate.com/d/msdownload/update/driver/drvs/2025/11/fc633db2-319c-4acb-815c-877902b824ff_8e228ba0068deff3460565a3294e27cdd428ac5c.cab"
+    }
+  }
+}
