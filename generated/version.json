@@ -1,141 +1,141 @@
-﻿{
-    "generated_at":  "2026-09-01T08:56:06.281Z",
-    "model":  "Axioo Pongo 750",
-    "vendor_code":  "NP50RNC1",
-    "target_os":  "Windows 11 x64",
-    "versions":  {
-                     "vga-2562":  {
-                                      "category":  "VGA",
-                                      "name":  "Intel Graphic",
-                                      "version":  "32.0.101.5768",
-                                      "date":  "2025-02-07",
-                                      "repo_id":  "2562",
-                                      "file":  "Graphics_Intel_32.0.101.5768.zip",
-                                      "url":  "https://driver.axiooworld.com/driver/VGA/Graphics_Intel_32.0.101.5768.zip"
-                                  },
-                     "audio-2551":  {
-                                        "category":  "AUDIO",
-                                        "name":  "AUDIO",
-                                        "version":  "6.0.9697.1",
-                                        "date":  "2025-02-07",
-                                        "repo_id":  "2551",
-                                        "file":  "Audio_6.0.9697.1.zip",
-                                        "url":  "https://driver.axiooworld.com/driver/AUDIO/Audio_6.0.9697.1.zip"
-                                    },
-                     "others-2564":  {
-                                         "category":  "OTHERS",
-                                         "name":  "Control Center 3.0",
-                                         "version":  "6.093",
-                                         "date":  "2025-02-07",
-                                         "repo_id":  "2564",
-                                         "file":  "08_CC30_v6.093_Win11_24H2.zip",
-                                         "url":  "https://driver.axiooworld.com/driver/OTHERS/08_CC30_v6.093_Win11_24H2.zip"
-                                     },
-                     "vga-2563":  {
-                                      "category":  "VGA",
-                                      "name":  "NVIDIA Graphic",
-                                      "version":  "55.99",
-                                      "date":  "2025-02-07",
-                                      "repo_id":  "2563",
-                                      "file":  "Graphics_NVIDIA_555.99.zip",
-                                      "url":  "https://driver.axiooworld.com/driver/VGA/Graphics_NVIDIA_555.99.zip"
-                                  },
-                     "wifi-2561":  {
-                                       "category":  "WIFI",
-                                       "name":  "WIFI",
-                                       "version":  "23.60.1.2",
-                                       "date":  "2025-02-07",
-                                       "repo_id":  "2561",
-                                       "file":  "Wifi_23_60_1_2.zip",
-                                       "url":  "https://driver.axiooworld.com/driver/WIFI/Wifi_23_60_1_2.zip"
-                                   },
-                     "others-2560":  {
-                                         "category":  "OTHERS",
-                                         "name":  "DTT",
-                                         "version":  "9.0.11701.44281",
-                                         "date":  "2025-02-07",
-                                         "repo_id":  "2560",
-                                         "file":  "DTT_9_0_11701_44281.zip",
-                                         "url":  "https://driver.axiooworld.com/driver/CHIPSET/DTT_9_0_11701_44281.zip"
-                                     },
-                     "others-2559":  {
-                                         "category":  "OTHERS",
-                                         "name":  "Speed Shift",
-                                         "version":  "1003.20240522",
-                                         "date":  "2025-02-07",
-                                         "repo_id":  "2559",
-                                         "file":  "SpeedShift_RPLH_1003_20240522.zip",
-                                         "url":  "https://driver.axiooworld.com/driver/OTHERS/SpeedShift_RPLH_1003_20240522.zip"
-                                     },
-                     "others-2558":  {
-                                         "category":  "OTHERS",
-                                         "name":  "GNA",
-                                         "version":  "03.05.00.1578",
-                                         "date":  "2025-02-07",
-                                         "repo_id":  "2558",
-                                         "file":  "GNA_03_05_00_1578.zip",
-                                         "url":  "https://driver.axiooworld.com/driver/OTHERS/GNA_03_05_00_1578.zip"
-                                     },
-                     "lan-2557":  {
-                                      "category":  "LAN",
-                                      "name":  "LAN",
-                                      "version":  "10.072.0524.2024",
-                                      "date":  "2025-02-07",
-                                      "repo_id":  "2557",
-                                      "file":  "LAN_RTL_10_072_0524_2024.zip",
-                                      "url":  "https://driver.axiooworld.com/driver/LAN/LAN_RTL_10_072_0524_2024.zip"
-                                  },
-                     "hid-filter-2556":  {
-                                             "category":  "HID FILTER",
-                                             "name":  "HID FILTER",
-                                             "version":  "2.2.2.10",
-                                             "date":  "2025-02-07",
-                                             "repo_id":  "2556",
-                                             "file":  "HIDfilter_2_2_2_10.zip",
-                                             "url":  "https://driver.axiooworld.com/driver/HID_FILTER/HIDfilter_2_2_2_10.zip"
-                                         },
-                     "chipset-2555":  {
-                                          "category":  "CHIPSET",
-                                          "name":  "Intel Management Engine",
-                                          "version":  "2425.6.26.0",
-                                          "date":  "2025-02-07",
-                                          "repo_id":  "2555",
-                                          "file":  "IME_2425.6.26.0.zip",
-                                          "url":  "https://driver.axiooworld.com/driver/CHIPSET/IME_2425.6.26.0.zip"
-                                      },
-                     "chipset-2554":  {
-                                          "category":  "CHIPSET",
-                                          "name":  "CHIPSET",
-                                          "version":  "10.1.19899.8597",
-                                          "date":  "2025-02-07",
-                                          "repo_id":  "2554",
-                                          "file":  "Chipset_Intel_10_1_19899_8597.zip",
-                                          "url":  "https://driver.axiooworld.com/driver/CHIPSET/Chipset_Intel_10_1_19899_8597.zip"
-                                      },
-                     "card-reader-2553":  {
-                                              "category":  "CARD READER",
-                                              "name":  "CARD READER",
-                                              "version":  "2.1.101.10700",
-                                              "date":  "2025-02-07",
-                                              "repo_id":  "2553",
-                                              "file":  "Cardreader_BayHub_2_1_101_10700.zip",
-                                              "url":  "https://driver.axiooworld.com/driver/CARD_READER/Cardreader_BayHub_2_1_101_10700.zip"
-                                          },
-                     "bluetooth-2552":  {
-                                            "category":  "BLUETOOTH",
-                                            "name":  "BLUETOOTH",
-                                            "version":  "23.60.0.1",
-                                            "date":  "2025-02-07",
-                                            "repo_id":  "2552",
-                                            "file":  "Bluetooth_23_60_0_1.zip",
-                                            "url":  "https://driver.axiooworld.com/driver/BLUETOOTH/Bluetooth_23_60_0_1.zip"
-                                        },
-                     "serial-io":  {
-                                       "category":  "SPECIAL",
-                                       "name":  "Intel Serial IO",
-                                       "version":  "30.100.2531.31",
-                                       "source":  "microsoft-update-catalog",
-                                       "url":  "https://catalog.s.download.windowsupdate.com/d/msdownload/update/driver/drvs/2025/11/fc633db2-319c-4acb-815c-877902b824ff_8e228ba0068deff3460565a3294e27cdd428ac5c.cab"
-                                   }
-                 }
+{
+  "generated_at": "2026-09-01T09:12:34.174Z",
+  "model": "Axioo Pongo 750",
+  "vendor_code": "NP50RNC1",
+  "target_os": "Windows 11 x64",
+  "versions": {
+    "vga-2562": {
+      "category": "VGA",
+      "name": "Intel Graphic",
+      "version": "32.0.101.5768",
+      "date": "2025-02-07",
+      "repo_id": "2562",
+      "file": "Graphics_Intel_32.0.101.5768.zip",
+      "url": "https://driver.axiooworld.com/driver/VGA/Graphics_Intel_32.0.101.5768.zip"
+    },
+    "audio-2551": {
+      "category": "AUDIO",
+      "name": "AUDIO",
+      "version": "6.0.9697.1",
+      "date": "2025-02-07",
+      "repo_id": "2551",
+      "file": "Audio_6.0.9697.1.zip",
+      "url": "https://driver.axiooworld.com/driver/AUDIO/Audio_6.0.9697.1.zip"
+    },
+    "others-2564": {
+      "category": "OTHERS",
+      "name": "Control Center 3.0",
+      "version": "6.093",
+      "date": "2025-02-07",
+      "repo_id": "2564",
+      "file": "08_CC30_v6.093_Win11_24H2.zip",
+      "url": "https://driver.axiooworld.com/driver/OTHERS/08_CC30_v6.093_Win11_24H2.zip"
+    },
+    "vga-2563": {
+      "category": "VGA",
+      "name": "NVIDIA Graphic",
+      "version": "55.99",
+      "date": "2025-02-07",
+      "repo_id": "2563",
+      "file": "Graphics_NVIDIA_555.99.zip",
+      "url": "https://driver.axiooworld.com/driver/VGA/Graphics_NVIDIA_555.99.zip"
+    },
+    "wifi-2561": {
+      "category": "WIFI",
+      "name": "WIFI",
+      "version": "23.60.1.2",
+      "date": "2025-02-07",
+      "repo_id": "2561",
+      "file": "Wifi_23_60_1_2.zip",
+      "url": "https://driver.axiooworld.com/driver/WIFI/Wifi_23_60_1_2.zip"
+    },
+    "others-2560": {
+      "category": "OTHERS",
+      "name": "DTT",
+      "version": "9.0.11701.44281",
+      "date": "2025-02-07",
+      "repo_id": "2560",
+      "file": "DTT_9_0_11701_44281.zip",
+      "url": "https://driver.axiooworld.com/driver/CHIPSET/DTT_9_0_11701_44281.zip"
+    },
+    "others-2559": {
+      "category": "OTHERS",
+      "name": "Speed Shift",
+      "version": "1003.20240522",
+      "date": "2025-02-07",
+      "repo_id": "2559",
+      "file": "SpeedShift_RPLH_1003_20240522.zip",
+      "url": "https://driver.axiooworld.com/driver/OTHERS/SpeedShift_RPLH_1003_20240522.zip"
+    },
+    "others-2558": {
+      "category": "OTHERS",
+      "name": "GNA",
+      "version": "03.05.00.1578",
+      "date": "2025-02-07",
+      "repo_id": "2558",
+      "file": "GNA_03_05_00_1578.zip",
+      "url": "https://driver.axiooworld.com/driver/OTHERS/GNA_03_05_00_1578.zip"
+    },
+    "lan-2557": {
+      "category": "LAN",
+      "name": "LAN",
+      "version": "10.072.0524.2024",
+      "date": "2025-02-07",
+      "repo_id": "2557",
+      "file": "LAN_RTL_10_072_0524_2024.zip",
+      "url": "https://driver.axiooworld.com/driver/LAN/LAN_RTL_10_072_0524_2024.zip"
+    },
+    "hid-filter-2556": {
+      "category": "HID FILTER",
+      "name": "HID FILTER",
+      "version": "2.2.2.10",
+      "date": "2025-02-07",
+      "repo_id": "2556",
+      "file": "HIDfilter_2_2_2_10.zip",
+      "url": "https://driver.axiooworld.com/driver/HID_FILTER/HIDfilter_2_2_2_10.zip"
+    },
+    "chipset-2555": {
+      "category": "CHIPSET",
+      "name": "Intel Management Engine",
+      "version": "2425.6.26.0",
+      "date": "2025-02-07",
+      "repo_id": "2555",
+      "file": "IME_2425.6.26.0.zip",
+      "url": "https://driver.axiooworld.com/driver/CHIPSET/IME_2425.6.26.0.zip"
+    },
+    "chipset-2554": {
+      "category": "CHIPSET",
+      "name": "CHIPSET",
+      "version": "10.1.19899.8597",
+      "date": "2025-02-07",
+      "repo_id": "2554",
+      "file": "Chipset_Intel_10_1_19899_8597.zip",
+      "url": "https://driver.axiooworld.com/driver/CHIPSET/Chipset_Intel_10_1_19899_8597.zip"
+    },
+    "card-reader-2553": {
+      "category": "CARD READER",
+      "name": "CARD READER",
+      "version": "2.1.101.10700",
+      "date": "2025-02-07",
+      "repo_id": "2553",
+      "file": "Cardreader_BayHub_2_1_101_10700.zip",
+      "url": "https://driver.axiooworld.com/driver/CARD_READER/Cardreader_BayHub_2_1_101_10700.zip"
+    },
+    "bluetooth-2552": {
+      "category": "BLUETOOTH",
+      "name": "BLUETOOTH",
+      "version": "23.60.0.1",
+      "date": "2025-02-07",
+      "repo_id": "2552",
+      "file": "Bluetooth_23_60_0_1.zip",
+      "url": "https://driver.axiooworld.com/driver/BLUETOOTH/Bluetooth_23_60_0_1.zip"
+    },
+    "serial-io": {
+      "category": "SPECIAL",
+      "name": "Intel Serial IO",
+      "version": "30.100.2531.31",
+      "source": "microsoft-update-catalog",
+      "url": "https://catalog.s.download.windowsupdate.com/d/msdownload/update/driver/drvs/2025/11/fc633db2-319c-4acb-815c-877902b824ff_8e228ba0068deff3460565a3294e27cdd428ac5c.cab"
+    }
+  }
 }
