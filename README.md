@@ -1,188 +1,193 @@
 # AxiooPongo-750-Drivers
 
-Driver repository untuk **Axioo Pongo 750 (NP50RNC1)**.
+Repository otomasi dan pemeliharaan driver resmi untuk **Axioo Pongo 750 (Model Code: NP50RNC1)**.
 
-Repository ini dibuat untuk memudahkan proses **download, instalasi, maintenance, dan repair driver** setelah melakukan clean install Windows, terutama pada Windows 11.
+Repository ini menyediakan sistem terintegrasi untuk **pengambilan metadata driver resmi (scraper API Axioo), instalasi otomatis, deteksi perangkat keras, perbaikan Precision Touchpad, dan verifikasi pasca-instalasi** pada Windows 11 64-bit.
 
-## 🎯 Tujuan
+---
 
-Repository ini menyediakan:
+## 🎯 Fitur & Arsitektur Utama
 
-- Koleksi driver untuk Axioo Pongo 750
-- Informasi versi driver terbaru melalui `version.json`
-- Script instalasi otomatis
-- Script pengecekan driver
-- Script verifikasi setelah instalasi
-- **Touchpad Repair** untuk mengatasi masalah Precision Touchpad / multi-touch gesture
-- Integrasi GitHub Actions untuk maintenance dan pembaruan metadata driver
+1. **Official Axioo API as Source of Truth**:
+   Metadata driver diambil secara otomatis dari API resmi Axioo tanpa daftar statis manual yang rawan usang.
+2. **Special Driver Integration (Intel Serial IO)**:
+   Mengintegrasikan driver Intel Serial IO resmi dari Microsoft Update Catalog untuk memperbaiki rantai deteksi Windows Precision Touchpad (I2C HID).
+3. **Automated Master Installer (`install.ps1`)**:
+   Membaca manifest `generated/drivers.json`, mengunduh paket resmi via HTTPS, memasang driver INF melalui `pnputil`, dan melakukan rescan perangkat keras.
+4. **Dedicated Touchpad Repair (`install-touchpad.ps1`)**:
+   Memasang Intel Serial IO GPIO & I2C secara terisolasi untuk memulihkan fungsi multi-touch gesture 2/3/4 jari.
+5. **Hardware Detection & Verification (`detect.ps1` & `verify.ps1`)**:
+   Mendiagnosis status stack perangkat keras dan memverifikasi kesiapan driver.
+6. **Scheduled CI/CD (`.github/workflows/scrape-drivers.yml`)**:
+   Memeriksa pembaruan driver secara berkala dan hanya melakukan commit apabila terdapat perubahan metadata.
 
-## 💻 Device
+---
 
-| Item | Detail |
+## 💻 Spesifikasi Target
+
+| Parameter | Spesifikasi |
 |---|---|
-| Brand | Axioo |
-| Series | PONGO |
-| Model | 750 |
-| Model Code | NP50RNC1 |
-| OS | Windows 11 64-bit |
+| **Brand** | Axioo |
+| **Series** | PONGO |
+| **Model** | 750 |
+| **Vendor / Model Code** | NP50RNC1 |
+| **Template ID** | 311 (`NBAXP7-C7D-165XH`) |
+| **Target OS** | Windows 11 (64-bit) |
 
-## 📦 Driver
+---
 
-Driver yang digunakan dalam repository ini mengikuti driver yang tersedia untuk **Axioo Pongo 750 / NP50RNC1**.
+## 📦 Daftar Driver Resmi
 
-| Category | Driver | Version |
-|---|---|---:|
-| VGA | Intel Graphic | 32.0.101.5768 |
-| VGA | NVIDIA Graphic | 55.99 |
-| AUDIO | Audio | 6.0.9697.1 |
-| WIFI | WiFi | 23.60.1.2 |
-| BLUETOOTH | Bluetooth | 23.60.0.1 |
-| LAN | LAN | 10.072.0524.2024 |
-| CARD READER | Card Reader | 2.1.101.10700 |
-| CHIPSET | Intel Management Engine | 2425.6.26.0 |
-| CHIPSET | Intel Chipset | 10.1.19899.8597 |
-| HID FILTER | HID Event Filter | 2.2.2.10 |
-| OTHERS | DTT | 9.0.11701.44281 |
-| OTHERS | Speed Shift | 1003.20240522 |
-| OTHERS | GNA | 03.05.00.1578 |
-| OTHERS | Control Center 3.0 | 6.093 |
+### Axioo Official Drivers (API Endpoint)
 
-### 🔧 Special Driver — Touchpad
+| Kategori | Nama Driver | Versi Resmi | Sumber |
+|---|---|---:|---|
+| **VGA** | Intel Graphic | `32.0.101.5768` | Axioo Official API |
+| **VGA** | NVIDIA Graphic | `55.99` | Axioo Official API |
+| **AUDIO** | Audio | `6.0.9697.1` | Axioo Official API |
+| **WIFI** | WiFi | `23.60.1.2` | Axioo Official API |
+| **BLUETOOTH** | Bluetooth | `23.60.0.1` | Axioo Official API |
+| **LAN** | LAN | `10.072.0524.2024` | Axioo Official API |
+| **CARD READER** | Card Reader | `2.1.101.10700` | Axioo Official API |
+| **CHIPSET** | Intel Management Engine | `2425.6.26.0` | Axioo Official API |
+| **CHIPSET** | Intel Chipset | `10.1.19899.8597` | Axioo Official API |
+| **HID FILTER** | HID Event Filter | `2.2.2.10` | Axioo Official API |
+| **OTHERS** | DTT | `9.0.11701.44281` | Axioo Official API |
+| **OTHERS** | Speed Shift | `1003.20240522` | Axioo Official API |
+| **OTHERS** | GNA | `03.05.00.1578` | Axioo Official API |
+| **OTHERS** | Control Center 3.0 | `6.093` | Axioo Official API |
 
-Touchpad Pongo 750 membutuhkan Intel Serial IO agar perangkat dapat terdeteksi melalui I²C.
+### Special Driver — Touchpad Precision Stack
 
-| Component | Version |
-|---|---:|
-| Intel Serial IO I2C Host Controller | 30.100.2531.31 |
-| Intel Serial IO GPIO Host Controller | 30.100.2531.31 |
+| Komponen | Versi | Sumber |
+|---|---:|---|
+| **Intel Serial IO I2C Host Controller** | `30.100.2531.31` | Microsoft Update Catalog |
+| **Intel Serial IO GPIO Host Controller** | `30.100.2531.31` | Microsoft Update Catalog |
 
-Hardware ID yang terkait:
-
+Hardware ID terkait:
 ```text
 PCI\VEN_8086&DEV_51E8
 ACPI\INTC1055
-````
-
-Setelah driver Serial IO terpasang dengan benar, perangkat touchpad diharapkan terdeteksi sebagai:
-
-```text
-I2C HID Device
-HID-compliant touch pad
-Microsoft Input Configuration Device
+ACPI\ELAN0412
 ```
 
-Hal ini memungkinkan fitur seperti:
+Rantai dependensi yang tervalidasi:
+```text
+Intel Serial IO GPIO (ACPI\INTC1055)
+        ↓
+Intel Serial IO I2C (PCI\VEN_8086&DEV_51E8)
+        ↓
+I2C HID Device (ACPI\ELAN0412)
+        ↓
+HID-compliant touch pad
+        ↓
+Microsoft Input Configuration Device
+        ↓
+Windows Precision Touchpad / Multi-Touch Gestures
+```
 
-* Two-finger scrolling
-* Pinch-to-zoom
-* Three-finger gestures
-* Four-finger gestures
+> [!NOTE]
+> Kemunculan `ACPI\ELAN0412` sebagai `PS/2 Compatible Mouse` bersamaan dengan `HID-compliant touch pad` adalah hal yang normal pada Windows 11 setelah Intel Serial IO terpasang.
 
-## 🚀 Installation
+---
 
-### Automatic Installation
+## 🚀 Panduan Penggunaan
+
+### 1. Automatic Installation (Master Installer)
 
 Jalankan PowerShell sebagai **Administrator**:
 
 ```powershell
+# Instalasi langsung dari GitHub:
 irm https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/install.ps1 | iex
 ```
 
-Installer akan:
+Atau jalankan secara lokal dari folder repository:
 
-1. Membaca konfigurasi driver
-2. Mengecek hardware
-3. Mengunduh driver
-4. Memasang driver
-5. Melakukan hardware rescan
-6. Melakukan verifikasi hasil instalasi
+```powershell
+# Mode interaktif (menampilkan menu pilihan):
+.\install.ps1
+
+# Memasang seluruh driver (Full Suite):
+.\install.ps1 -All
+
+# Hanya memasang stack Touchpad (Intel Serial IO + HID Filter):
+.\install.ps1 -TouchpadOnly
+```
 
 ---
 
-## 🖱️ Touchpad Repair
+### 2. Touchpad Repair
 
-Gunakan fitur ini apabila touchpad hanya berfungsi sebagai mouse biasa dan gesture 2/3/4 jari tidak tersedia.
-
-Contoh gejala:
-
-```text
-PS/2 Compatible Mouse
-```
-
-dan Settings → Touchpad hanya menampilkan opsi dasar seperti:
-
-```text
-Taps
-Touchpad sensitivity
-```
-
-Jalankan:
+Gunakan script ini apabila touchpad hanya berfungsi sebagai pointer dasar dan pengaturan gesture multi-jari tidak muncul di Settings Windows:
 
 ```powershell
+# Eksekusi langsung via web:
 irm https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/install-touchpad.ps1 | iex
 ```
 
-Repair akan memperbaiki dependency berikut:
+Atau jalankan secara lokal:
 
-```text
-Intel Serial IO GPIO
-        ↓
-Intel Serial IO I2C
-        ↓
-I2C HID Device
-        ↓
-HID-compliant touch pad
-        ↓
-Microsoft Input Configuration Device
+```powershell
+.\install-touchpad.ps1
 ```
 
-Setelah proses selesai, **restart Windows**.
+Setelah script selesai, **restart Windows** dan buka:
+`Settings` $\rightarrow$ `Bluetooth & devices` $\rightarrow$ `Touchpad` untuk memastikan gesture multi-touch aktif.
 
-Kemudian buka:
+---
 
-```text
-Settings
-→ Bluetooth & devices
-→ Touchpad
-```
+### 3. Hardware & Driver Detection
 
-dan pastikan opsi multi-touch gesture sudah tersedia.
-
-## 🔍 Driver Detection
-
-Untuk mengecek kondisi driver:
+Untuk mendeteksi kondisi perangkat keras dan status driver saat ini:
 
 ```powershell
 .\detect.ps1
 ```
 
-Contoh hasil yang diharapkan:
+Contoh keluaran yang diharapkan:
 
 ```text
-[OK]   SerialIO-I2C
-[OK]   SerialIO-GPIO
-[OK]   Touchpad
-[OK]   I2C-HID
-[OK]   Microsoft-Input-Configuration
+=========================================
+ Axioo Pongo 750 Device Detection
+=========================================
+
+[ Touchpad & Serial IO Stack ]
+[OK]   SerialIO-I2C                   : Intel(R) Serial IO I2C Host Controller - 51E8 [OK]
+[OK]   SerialIO-GPIO                  : Intel(R) Serial IO GPIO Host Controller - INTC1055 [OK]
+[OK]   I2C-HID                        : I2C HID Device [OK]
+[OK]   Touchpad                       : HID-compliant touch pad [OK]
+[OK]   Microsoft-Input-Configuration  : Microsoft Input Configuration Device [OK]
+
+[ ELAN Touchpad Hardware Status ]
+[INFO] Instance: ACPI\ELAN0412\0
+       Name    : PS/2 Compatible Mouse [OK]
+[INFO] Instance: ACPI\ELAN0412\4&81F98AE&0
+       Name    : I2C HID Device [OK]
+
+[ Core Hardware Subsystems ]
+[OK]   Intel Graphics       : Intel(R) UHD Graphics
+[OK]   NVIDIA Graphics      : NVIDIA GeForce RTX 4050 Laptop GPU
+[OK]   Audio                : Realtek(R) Audio
+[OK]   WiFi                 : Microsoft Wi-Fi Direct Virtual Adapter
+[OK]   LAN                  : Realtek PCIe GbE Family Controller
+[OK]   Bluetooth            : Intel(R) Wireless Bluetooth(R)
+
+[ Assessment ]
+STATUS: Precision Touchpad aktif dan siap digunakan.
 ```
 
-## ✅ Verification
+---
 
-Setelah instalasi:
+### 4. Post-Installation Verification
+
+Untuk memverifikasi integritas stack Precision Touchpad:
 
 ```powershell
 .\verify.ps1
 ```
 
-Verification akan memeriksa:
-
-* Intel Serial IO I2C
-* Intel Serial IO GPIO
-* I2C HID Device
-* HID-compliant touch pad
-* Microsoft Input Configuration Device
-
-Contoh:
+Contoh keluaran yang diharapkan:
 
 ```text
 [OK]   Intel Serial IO I2C
@@ -194,94 +199,56 @@ Contoh:
 Touchpad verification PASSED.
 ```
 
-## 📋 Version Metadata
+---
 
-Versi driver disimpan pada:
+### 5. Menjalankan Scraper API
 
-```text
-version.json
+Untuk memperbarui metadata `generated/drivers.json` dan `generated/version.json` langsung dari API Axioo:
+
+**Menggunakan PowerShell (Natif Windows):**
+```powershell
+.\scripts\scrape-axioo.ps1
 ```
 
-Contoh:
-
-```json
-{
-  "generated_at": "2026-09-01T00:00:00Z",
-  "model": "PONGO 750 NP50RNC1",
-  "drivers": {
-    "intel-graphics": "32.0.101.5768",
-    "audio": "6.0.9697.1",
-    "nvidia": "55.99",
-    "wifi": "23.60.1.2",
-    "bluetooth": "23.60.0.1",
-    "hid-filter": "2.2.2.10",
-    "intel-chipset": "10.1.19899.8597",
-    "serial-io": "30.100.2531.31"
-  }
-}
+**Menggunakan Node.js (Lintas Platform / CI):**
+```bash
+node scripts/scrape-axioo.mjs
 ```
 
-`version.json` dihasilkan secara otomatis oleh GitHub Actions agar informasi versi tetap mudah diperbarui.
+---
 
-## 🤖 GitHub Actions
-
-Repository menggunakan GitHub Actions untuk:
-
-* Memperbarui metadata driver
-* Menghasilkan `version.json`
-* Mengecek perubahan versi
-* Commit perubahan secara otomatis
-* Menjaga repository tetap mudah dipelihara
-
-Workflow berada di:
-
-```text
-.github/workflows/
-├── update-drivers.yml
-└── release.yml
-```
-
-## ⚠️ Notes
-
-Repository ini ditujukan khusus untuk:
-
-```text
-Axioo Pongo 750
-Model: NP50RNC1
-Windows 11 x64
-```
-
-Driver sebaiknya dipasang sesuai perangkat dan hardware ID masing-masing.
-
-Khusus touchpad, **jangan menginstal driver ELAN/Synaptics secara acak** apabila perangkat belum memiliki Intel Serial IO I²C/GPIO yang benar.
-
-## 📁 Repository Structure
+## 📁 Struktur Repository Final
 
 ```text
 AxiooPongo-750-Drivers/
 │
 ├── .github/
 │   └── workflows/
-│       ├── update-drivers.yml
-│       └── release.yml
+│       └── scrape-drivers.yml      # CI/CD scraper schedule & auto-commit
 │
-├── drivers.json
-├── version.json
+├── config/
+│   └── special-drivers.json        # Konfigurasi driver eksternal (Intel Serial IO)
 │
-├── install.ps1
-├── install-touchpad.ps1
-├── detect.ps1
-├── verify.ps1
+├── generated/
+│   ├── drivers.json                # Metadata resmi hasil scraping API Axioo
+│   └── version.json                # Lookup versi terkompilasi
 │
-├── README.md
-└── LICENSE
+├── scripts/
+│   ├── scrape-axioo.ps1            # Scraper API resmi versi PowerShell
+│   └── scrape-axioo.mjs            # Scraper API resmi versi Node.js ESM
+│
+├── install.ps1                     # Master installer driver
+├── install-touchpad.ps1            # Script perbaikan Precision Touchpad
+├── detect.ps1                      # Skrip deteksi perangkat & status driver
+├── verify.ps1                      # Skrip verifikasi pasca-instalasi
+│
+├── README.md                       # Dokumentasi resmi
+└── LICENSE                         # Lisensi repository
 ```
 
-## 📜 License
+---
 
-Lihat file [`LICENSE`](LICENSE).
+## 📜 Lisensi & Atribusi
 
-Driver yang didistribusikan melalui repository ini tetap merupakan milik masing-masing vendor/pemegang haknya.
-
-Repository ini berfungsi sebagai **maintenance, automation, dan convenience layer** untuk Axioo Pongo 750.
-
+- File script otomasi dalam repository ini dilisensikan di bawah lisensi open source.
+- Driver dan perangkat lunak yang diunduh merupakan hak cipta dan merek dagang milik masing-masing vendor (Axioo, Intel, NVIDIA, Realtek, BayHub, Microsoft).
