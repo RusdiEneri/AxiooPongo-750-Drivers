@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-01T08:21:47.693830+00:00",
+  "generated_at": "2026-09-01T08:26:48.098348+00:00",
   "model": "PONGO 750 NP50RNC1",
   "drivers": {
     "intel-graphics": "32.0.101.5768",
     "audio": "6.0.9697.1",
     "control-center": "6.093",
-    "nvidia": "55.99",
+    "nvidia": "555.99",
     "wifi": "23.60.1.2",
     "dtt": "9.0.11701.44281",
     "speed-shift": "1003.20240522",
