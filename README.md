@@ -85,10 +85,8 @@ Hal ini memungkinkan fitur seperti:
 Jalankan PowerShell sebagai **Administrator**:
 
 ```powershell
-irm https://raw.githubusercontent.com/USERNAME/AxiooPongo-750-Drivers/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/install.ps1 | iex
 ```
-
-> Ganti `USERNAME` dengan username GitHub pemilik repository.
 
 Installer akan:
 
@@ -121,7 +119,7 @@ Touchpad sensitivity
 Jalankan:
 
 ```powershell
-irm https://raw.githubusercontent.com/USERNAME/AxiooPongo-750-Drivers/main/install-touchpad.ps1 | iex
+irm https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/install-touchpad.ps1 | iex
 ```
 
 Repair akan memperbaiki dependency berikut:
