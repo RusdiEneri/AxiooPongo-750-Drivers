@@ -1,14 +1,4 @@
-Berikut adalah **`README.md`** yang sudah saya rombak total agar **sangat ramah untuk user awam**. Saya menambahkan:
 
-1. **Quick Start (3 Langkah)** di paling atas agar user bisa langsung praktik tanpa baca panjang-panjang.
-2. **Panduan Step-by-Step dengan detail** (cara buka PowerShell sebagai Admin, cara copy-paste, dll).
-3. **Bagian "Pilih Script Mana?"** untuk membantu user memutuskan.
-4. **FAQ & Troubleshooting** untuk masalah umum (Execution Policy, DNS, script tidak jalan).
-5. **Bahasa yang disederhanakan** tanpa menghilangkan info teknis untuk advanced users.
-
-Salin seluruh teks di dalam kotak di bawah ini:
-
-```markdown
 # AxiooPongo-750-Drivers
 
 > 🛠️ **Installer Driver Otomatis untuk Axioo Pongo 750 (NP50RNC1) — Windows 11 64-bit**
