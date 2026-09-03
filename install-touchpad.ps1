@@ -8,8 +8,25 @@ param(
     [switch]$SkipVerify
 )
 
-$ErrorActionPreference = "Stop"
+# Menggunakan Continue agar tidak crash total, kita tangani error secara manual di catch block
+$ErrorActionPreference = "Continue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# ------------------------------------------------------------------------------
+# 0. Self-Recovery untuk eksekusi via 'irm | iex'
+# ------------------------------------------------------------------------------
+if (-not $PSScriptRoot -and -not $MyInvocation.MyCommand.Path) {
+    Write-Host "Script dijalankan via pipe (irm | iex). Mengunduh ke direktori sementara..." -ForegroundColor Yellow
+    $tempScript = Join-Path $env:TEMP "AxiooTouchpadRepair.ps1"
+    try {
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/install-touchpad.ps1" -OutFile $tempScript -UseBasicParsing
+        & $tempScript @PSBoundParameters
+        exit $LASTEXITCODE
+    } catch {
+        Write-Error "Gagal mengunduh script ke direktori sementara: $_"
+        exit 1
+    }
+}
 
 function Test-IsAdmin {
     $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -67,22 +84,37 @@ try {
     Write-Host "  - ELAN Touchpad (ELAN0412)     : $(if ($elanDev) { "$($elanDev.FriendlyName) [$($elanDev.Status)]" } else { 'Tidak terdeteksi' })"
 
     # --------------------------------------------------------------------------
-    # 3. Download Intel Serial IO Package
+    # 3. Download Intel Serial IO Package (With Auto-Retry & Timeout)
     # --------------------------------------------------------------------------
     Write-Host ""
     Write-Host "[2/5] Mengunduh driver Intel Serial IO (v30.100.2531.31)..." -ForegroundColor Yellow
     Write-Host "  URL: $SerialIOUrl"
 
     $CabPath = Join-Path $TempDir "SerialIO.cab"
+    
+    $maxRetries = 3
+    $downloadSuccess = $false
+    
+    for ($i = 1; $i -le $maxRetries; $i++) {
+        try {
+            Invoke-WebRequest -Uri $SerialIOUrl -OutFile $CabPath -UseBasicParsing -Headers @{ "User-Agent" = "Mozilla/5.0" } -TimeoutSec 120
+            if ((Test-Path $CabPath) -and (Get-Item $CabPath).Length -gt 0) {
+                $downloadSuccess = $true
+                break
+            } else {
+                throw "File unduhan kosong (0 bytes)."
+            }
+        } catch {
+            Write-Warning "  [Percobaan $i/$maxRetries] Gagal mengunduh: $($_.Exception.Message)"
+            if ($i -lt $maxRetries) {
+                Write-Host "  Menunggu 5 detik sebelum mencoba lagi..." -ForegroundColor Gray
+                Start-Sleep -Seconds 5
+            }
+        }
+    }
 
-    Invoke-WebRequest `
-        -Uri $SerialIOUrl `
-        -OutFile $CabPath `
-        -UseBasicParsing `
-        -Headers @{ "User-Agent" = "Mozilla/5.0" }
-
-    if (-not (Test-Path $CabPath) -or (Get-Item $CabPath).Length -eq 0) {
-        throw "Gagal mengunduh paket Serial IO CAB atau ukuran file 0 bytes."
+    if (-not $downloadSuccess) {
+        throw "Gagal mengunduh paket Serial IO CAB setelah $maxRetries percobaan. Pastikan koneksi internet stabil atau coba gunakan Hotspot HP (DNS ISP mungkin memblokir server Microsoft)."
     }
 
     # --------------------------------------------------------------------------
@@ -114,11 +146,11 @@ try {
 
     Write-Host "  - Installing GPIO Driver (iaLPSS2_GPIO2_ADL.inf)..."
     $pnpGpio = & pnputil.exe /add-driver "$gpioInf" /install 2>&1
-    Write-Host ($pnpGpio -join "`n")
+    Write-Host "       $(($pnpGpio | Select-Object -First 3) -join ' ')"
 
     Write-Host "  - Installing I2C Driver (iaLPSS2_I2C_ADL.inf)..."
     $pnpI2c = & pnputil.exe /add-driver "$i2cInf" /install 2>&1
-    Write-Host ($pnpI2c -join "`n")
+    Write-Host "       $(($pnpI2c | Select-Object -First 3) -join ' ')"
 
     # --------------------------------------------------------------------------
     # 6. Rescan Hardware
@@ -168,6 +200,11 @@ try {
             Write-Host "Silakan RESTART Windows sekarang." -ForegroundColor Yellow
         }
     }
+}
+catch {
+    Write-Host ""
+    Write-Error "Terjadi kesalahan fatal: $_"
+    Write-Host "[TIPS] Jika error terkait 'remote name could not be resolved', matikan WiFi dan gunakan Tethering Hotspot HP sementara waktu, lalu jalankan ulang script ini." -ForegroundColor Magenta
 }
 finally {
     if (Test-Path $TempDir) {

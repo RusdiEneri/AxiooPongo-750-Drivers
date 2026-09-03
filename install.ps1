@@ -28,13 +28,33 @@ param(
 
     [Parameter()]
     [switch]$Force,
+    
+    [Parameter()]
+    [switch]$ClearCache,
 
     [Parameter()]
     [string]$ManifestPath
 )
 
-$ErrorActionPreference = "Stop"
+# Mencegah script berhenti total (crash) saat ada error unduhan/jaringan
+$ErrorActionPreference = "Continue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# ------------------------------------------------------------------------------
+# 0. Self-Recovery untuk eksekusi via 'irm | iex'
+# ------------------------------------------------------------------------------
+if (-not $PSScriptRoot -and -not $MyInvocation.MyCommand.Path) {
+    Write-Host "Script dijalankan via pipe (irm | iex). Mengunduh ke direktori sementara agar berjalan optimal..." -ForegroundColor Yellow
+    $tempScript = Join-Path $env:TEMP "AxiooPongoInstaller.ps1"
+    try {
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/install.ps1" -OutFile $tempScript -UseBasicParsing
+        & $tempScript @PSBoundParameters
+        exit $LASTEXITCODE
+    } catch {
+        Write-Error "Gagal mengunduh script ke direktori sementara: $_"
+        exit 1
+    }
+}
 
 # ------------------------------------------------------------------------------
 # 1. Administrator Elevation Check
@@ -100,6 +120,18 @@ if ($DetectOnly) {
 if (-not (Test-IsAdmin)) {
     Write-Error "Instalasi driver membutuhkan hak akses Administrator. Jalankan PowerShell sebagai Administrator."
     exit 1
+}
+
+# Cache Management
+$CacheDir = Join-Path $env:LOCALAPPDATA "AxiooPongoCache"
+if (-not (Test-Path $CacheDir)) {
+    New-Item -ItemType Directory -Force -Path $CacheDir | Out-Null
+}
+
+if ($ClearCache) {
+    Write-Host "Membersihkan cache unduhan lokal..." -ForegroundColor Yellow
+    Remove-Item "$CacheDir\*" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "Cache berhasil dibersihkan." -ForegroundColor Green
 }
 
 $manifest = Get-DriverManifest -CustomPath $ManifestPath
@@ -243,21 +275,45 @@ try {
         }
 
         $fileName = if ($driver.file_repo) { $driver.file_repo } else { Split-Path $url -Leaf }
+        $cachedFile = Join-Path $CacheDir $fileName
         $targetFile = Join-Path $TempBase $fileName
         $extractDir = Join-Path $TempBase ("Extracted_" + $driver.id)
 
-        # 4.1 Download
+        # 4.1 Download dengan Cache & Network Resilience
         Write-Host "  Mengunduh dari: $url" -ForegroundColor Yellow
-        try {
-            Invoke-WebRequest -Uri $url -OutFile $targetFile -UseBasicParsing -Headers @{ "User-Agent" = "Mozilla/5.0" }
-        }
-        catch {
-            Write-Error "  [ERROR] Gagal mengunduh $($fileName): $_"
-            continue
+        $downloadSuccess = $false
+        
+        if ((Test-Path $cachedFile) -and (Get-Item $cachedFile).Length -gt 1MB) {
+            Write-Host "  [CACHE] Ditemukan di cache lokal. Melewati unduhan..." -ForegroundColor Green
+            Copy-Item $cachedFile $targetFile -Force
+            $downloadSuccess = $true
+        } else {
+            $maxRetries = 3
+            for ($i = 1; $i -le $maxRetries; $i++) {
+                try {
+                    Invoke-WebRequest -Uri $url -OutFile $targetFile -UseBasicParsing -Headers @{ "User-Agent" = "Mozilla/5.0" } -TimeoutSec 120
+                    if ((Test-Path $targetFile) -and (Get-Item $targetFile).Length -gt 1MB) {
+                        # Simpan ke cache persisten
+                        Copy-Item $targetFile $cachedFile -Force -ErrorAction SilentlyContinue
+                        $downloadSuccess = $true
+                        break
+                    } else {
+                        throw "File unduhan kosong atau tidak valid."
+                    }
+                }
+                catch {
+                    Write-Warning "  [Percobaan $i/$maxRetries] Gagal mengunduh: $($_.Exception.Message)"
+                    if ($i -lt $maxRetries) {
+                        Write-Host "  Menunggu 5 detik sebelum mencoba lagi..." -ForegroundColor Gray
+                        Start-Sleep -Seconds 5
+                    }
+                }
+            }
         }
 
-        if (-not (Test-Path $targetFile) -or (Get-Item $targetFile).Length -eq 0) {
-            Write-Error "  [ERROR] File unduhan $fileName kosong atau tidak ditemukan."
+        if (-not $downloadSuccess) {
+            Write-Error "  [ERROR] Gagal mengunduh $($fileName) setelah percobaan. Melewati driver ini..."
+            Write-Host "  [TIPS] Jika banyak driver gagal, kemungkinan DNS/ISP Anda bermasalah. Coba gunakan Hotspot HP atau ganti DNS ke 8.8.8.8 / 1.1.1.1." -ForegroundColor Magenta
             continue
         }
 
@@ -295,7 +351,8 @@ try {
             foreach ($inf in $infFiles) {
                 Write-Host "    -> pnputil /add-driver `"$($inf.FullName)`" /install"
                 $pnpResult = & pnputil.exe /add-driver "$($inf.FullName)" /install 2>&1
-                Write-Host "       $($pnpResult | Select-Object -First 3 -join ' ')"
+                # FIXED: Sintaks -join diperbaiki
+                Write-Host "       $(($pnpResult | Select-Object -First 3) -join ' ')"
             }
             $installedInf = $true
         }

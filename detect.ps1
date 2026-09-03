@@ -5,7 +5,25 @@
 [CmdletBinding()]
 param()
 
-$ErrorActionPreference = "SilentlyContinue"
+# Gunakan "Continue" agar error tidak disembunyikan secara global.
+# Kita cukup gunakan -ErrorAction SilentlyContinue pada cmdlet spesifik.
+$ErrorActionPreference = "Continue"
+
+# ------------------------------------------------------------------------------
+# 0. Self-Recovery untuk eksekusi via 'irm | iex'
+# ------------------------------------------------------------------------------
+if (-not $PSScriptRoot -and -not $MyInvocation.MyCommand.Path) {
+    Write-Host "Script dijalankan via pipe (irm | iex). Mengunduh ke direktori sementara..." -ForegroundColor Yellow
+    $tempScript = Join-Path $env:TEMP "AxiooDetect.ps1"
+    try {
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/RusdiEneri/AxiooPongo-750-Drivers/main/detect.ps1" -OutFile $tempScript -UseBasicParsing
+        & $tempScript @PSBoundParameters
+        exit $LASTEXITCODE
+    } catch {
+        Write-Error "Gagal mengunduh script ke direktori sementara: $_"
+        exit 1
+    }
+}
 
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host " Axioo Pongo 750 Device Detection" -ForegroundColor Cyan
@@ -44,7 +62,8 @@ $touchpadChecks = @(
         Device        = ($devices | Where-Object { $_.FriendlyName -eq "HID-compliant touch pad" })
     },
     @{
-        Key           = "Microsoft-Input-Configuration"
+        # Disingkat agar alignment PadRight lebih rapi
+        Key           = "Microsoft-Input-Config"
         RequiredName  = "Microsoft Input Configuration Device"
         HardwareId    = "HID\ELAN0412"
         Device        = ($devices | Where-Object { $_.FriendlyName -eq "Microsoft Input Configuration Device" })
@@ -53,12 +72,13 @@ $touchpadChecks = @(
 
 foreach ($item in $touchpadChecks) {
     $dev = $item.Device | Select-Object -First 1
+    # Menggunakan PadRight(26) agar kolom titik dua (:) lurus sempurna
     if ($dev -and $dev.Status -eq "OK") {
-        Write-Host "[OK]   $($item.Key.PadRight(30)) : $($dev.FriendlyName) [$($dev.Status)]" -ForegroundColor Green
+        Write-Host "[OK]   $($item.Key.PadRight(26)) : $($dev.FriendlyName) [$($dev.Status)]" -ForegroundColor Green
     } elseif ($dev) {
-        Write-Host "[WARN] $($item.Key.PadRight(30)) : $($dev.FriendlyName) [$($dev.Status)]" -ForegroundColor Yellow
+        Write-Host "[WARN] $($item.Key.PadRight(26)) : $($dev.FriendlyName) [$($dev.Status)]" -ForegroundColor Yellow
     } else {
-        Write-Host "[FAIL] $($item.Key.PadRight(30)) : Device tidak terdeteksi / driver belum terpasang" -ForegroundColor Red
+        Write-Host "[FAIL] $($item.Key.PadRight(26)) : Device tidak terdeteksi / driver belum terpasang" -ForegroundColor Red
     }
 }
 
@@ -78,27 +98,32 @@ if ($elanAcpi) {
 }
 
 # ------------------------------------------------------------------------------
-# 3. Core Subsystems (GPU, Audio, Network)
+# 3. Core Subsystems (GPU, Audio, Network, Camera, Card Reader)
 # ------------------------------------------------------------------------------
 Write-Host "`n[ Core Hardware Subsystems ]" -ForegroundColor Yellow
 
 $subsystems = @(
     @{ Name = "Intel Graphics"; Dev = ($devices | Where-Object { $_.Class -eq "Display" -and $_.FriendlyName -match "Intel" }) },
     @{ Name = "NVIDIA Graphics"; Dev = ($devices | Where-Object { $_.Class -eq "Display" -and $_.FriendlyName -match "NVIDIA|GeForce|RTX" }) },
-    @{ Name = "Audio"; Dev = ($devices | Where-Object { $_.Class -eq "MEDIA" -and $_.FriendlyName -match "Realtek|High Definition Audio" }) },
-    @{ Name = "WiFi"; Dev = ($devices | Where-Object { $_.Class -eq "Net" -and $_.FriendlyName -match "Wi-Fi|Wireless|Intel" }) },
-    @{ Name = "LAN"; Dev = ($devices | Where-Object { $_.Class -eq "Net" -and $_.FriendlyName -match "Realtek|GbE|Ethernet" }) },
-    @{ Name = "Bluetooth"; Dev = ($devices | Where-Object { $_.Class -eq "Bluetooth" -and $_.FriendlyName -match "Bluetooth" }) }
+    @{ Name = "Audio"; Dev = ($devices | Where-Object { $_.Class -eq "MEDIA" -and $_.FriendlyName -match "Realtek|High Definition Audio|Intel" }) },
+    # Ditambahkan Realtek/MediaTek untuk antisipasi varian kartu WiFi Axioo non-Intel
+    @{ Name = "WiFi"; Dev = ($devices | Where-Object { $_.Class -eq "Net" -and $_.FriendlyName -match "Wi-Fi|Wireless|Intel|Realtek|MediaTek|AX201|AX211|RZ608|MT7921" }) },
+    @{ Name = "LAN"; Dev = ($devices | Where-Object { $_.Class -eq "Net" -and $_.FriendlyName -match "Realtek|GbE|Ethernet|PCIe" }) },
+    @{ Name = "Bluetooth"; Dev = ($devices | Where-Object { $_.Class -eq "Bluetooth" -and $_.FriendlyName -match "Bluetooth|Intel|Realtek|MediaTek" }) },
+    # Tambahan: Pendeteksian WebCam
+    @{ Name = "WebCam"; Dev = ($devices | Where-Object { ($_.Class -eq "Camera" -or $_.Class -eq "Image") -and $_.FriendlyName -match "Camera|WebCam|HD|IR|Realtek|Chicony|Sonix" }) },
+    # Tambahan: Pendeteksian Card Reader (Sering bermasalah di Axioo/Clevo)
+    @{ Name = "Card Reader"; Dev = ($devices | Where-Object { $_.FriendlyName -match "Card Reader|Realtek|BayHub|SD" -and $_.Class -ne "USB" }) }
 )
 
 foreach ($sub in $subsystems) {
     $d = $sub.Dev | Select-Object -First 1
     if ($d -and $d.Status -eq "OK") {
-        Write-Host "[OK]   $($sub.Name.PadRight(20)) : $($d.FriendlyName)" -ForegroundColor Green
+        Write-Host "[OK]   $($sub.Name.PadRight(16)) : $($d.FriendlyName)" -ForegroundColor Green
     } elseif ($d) {
-        Write-Host "[WARN] $($sub.Name.PadRight(20)) : $($d.FriendlyName) [$($d.Status)]" -ForegroundColor Yellow
+        Write-Host "[WARN] $($sub.Name.PadRight(16)) : $($d.FriendlyName) [$($d.Status)]" -ForegroundColor Yellow
     } else {
-        Write-Host "[INFO] $($sub.Name.PadRight(20)) : Belum terdeteksi atau menggunakan generic driver" -ForegroundColor DarkGray
+        Write-Host "[INFO] $($sub.Name.PadRight(16)) : Belum terdeteksi atau menggunakan generic driver" -ForegroundColor DarkGray
     }
 }
 
