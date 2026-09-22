@@ -5,6 +5,9 @@ on:
 
   schedule:
     - cron: "0 * * * *"
+  push:
+    paths:
+      -".github/workflows/scrape-drivers.yml"
 
 permissions:
   contents: write
