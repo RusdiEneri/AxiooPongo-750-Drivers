@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'log.txt'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup git config
+        run: |
+          git config user.name 'RusdiEneri'
+          git config user.email 'nuruddinrusydiilham@gmail.com'
+          
+      - name: Configure Git Remote with Token
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RusdiEneri/AxiooPongo-750-Drivers.git
+
+      # Commit 1
+      - name: Commit 1
+        run: |
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 1" >> log.txt
+          git add log.txt
+          git commit -m "Log commit 1 - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+
+      # Commit 2
+      - name: Commit 2
+        run: |
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 2" >> log.txt
+          git add log.txt
+          git commit -m "Log commit 2 - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+
+      # Commit 3
+      - name: Commit 3
+        run: |
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 3" >> log.txt
+          git add log.txt
+          git commit -m "Log commit 3 - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+
+      # Commit 4
+      - name: Commit 4
+        run: |
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 4" >> log.txt
+          git add log.txt
+          git commit -m "Log commit 4 - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+
+      # Commit 5
+      - name: Commit 5
+        run: |
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 5" >> log.txt
+          git add log.txt
+          git commit -m "Log commit 5 - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
