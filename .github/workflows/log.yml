@@ -5,9 +5,12 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
-  group: write-main          # SAMA dengan scrape-drivers.yml
-  cancel-in-progress: false  # mengantre, bukan dibatalkan
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -16,17 +19,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0     # history lengkap agar rebase mulus
+          fetch-depth: 0
 
       - name: Setup git and branch tracking
+        env:
+          # Branch dinamis: otomatis mengikuti branch default repo
+          BRANCH: ${{ github.ref_name }}
+          # Identity otomatis: pakai user yang trigger workflow
+          GIT_USER: ${{ github.actor }}
+          GIT_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
         run: |
-          git config user.name 'RusdiEneri'
-          git config user.email 'nuruddinrusydiilham@gmail.com'
+          git config user.name "$GIT_USER"
+          git config user.email "$GIT_EMAIL"
           git config pull.rebase true
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git checkout -B main origin/main
+          git checkout -B "$BRANCH" "origin/$BRANCH"
 
       - name: Create 5 Commits and Push
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           for i in 1 2 3 4 5; do
             echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit $i" >> log.txt
@@ -35,11 +46,12 @@ jobs:
             sleep 1
           done
           for attempt in 1 2 3 4 5; do
-            git pull --rebase origin main || git rebase --abort
-            if git push origin main; then
+            git pull --rebase origin "$BRANCH" || git rebase --abort
+            if git push origin "$BRANCH"; then
               echo "Push berhasil"
               exit 0
             fi
+            echo "Push ditolak, coba lagi 10 detik... (percobaan $attempt)"
             sleep 10
           done
           exit 1
