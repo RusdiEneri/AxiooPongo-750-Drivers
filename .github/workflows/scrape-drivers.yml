@@ -5,23 +5,26 @@ on:
   schedule:
     - cron: "0 * * * *"
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths:
       - ".github/workflows/scrape-drivers.yml"
 
 permissions:
   contents: write
 
+concurrency:
+  group: write-main          # SAMA dengan log.yml
+  cancel-in-progress: false
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,11 +34,24 @@ jobs:
       - name: Run scraper
         run: node scripts/scrape-axioo.mjs
 
-      # Menggunakan Action Otomatis (Anti Error Rejected)
-      - name: Commit and push generated files
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update Axioo Pongo 750 driver metadata"
-          file_pattern: "generated/drivers.json generated/version.json"
-          commit_user_name: "RusdiEneri"
-          commit_user_email: "nuruddinrusydiilham@gmail.com"
+      - name: Commit and push (anti-rejected)
+        run: |
+          git config user.name "RusdiEneri"
+          git config user.email "nuruddinrusydiilham@gmail.com"
+          git add generated/drivers.json generated/version.json
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan data."
+            exit 0
+          fi
+          git commit -m "chore: update Axioo Pongo 750 driver metadata"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main || git rebase --abort
+            if git push origin main; then
+              echo "Push berhasil (percobaan ke-$attempt)"
+              exit 0
+            fi
+            echo "Push ditolak, coba lagi 10 detik..."
+            sleep 10
+          done
+          echo "Gagal push setelah 5 percobaan"
+          exit 1

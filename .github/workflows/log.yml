@@ -1,48 +1,45 @@
 name: CI
 
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - 'log.txt'
-  workflow_dispatch:
   schedule:
     - cron: '*/5 * * * *'
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: write-main          # SAMA dengan scrape-drivers.yml
+  cancel-in-progress: false  # mengantre, bukan dibatalkan
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0     # history lengkap agar rebase mulus
 
       - name: Setup git and branch tracking
         run: |
           git config user.name 'RusdiEneri'
           git config user.email 'nuruddinrusydiilham@gmail.com'
           git config pull.rebase true
-          # Menggunakan variabel dinamis agar bisa dipakai di repo manapun
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git checkout -B main origin/main
 
       - name: Create 5 Commits and Push
         run: |
-          # Loop untuk membuat 5 commit
           for i in 1 2 3 4 5; do
             echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit $i" >> log.txt
             git add log.txt
             git commit -m "Log commit $i - $(date '+%Y-%m-%d %H:%M:%S')"
-            sleep 1 # Jeda 1 detik agar timestamp di file log.txt berbeda detik
+            sleep 1
           done
-          
-          # Tarik perubahan terbaru dari remote, lalu push sekaligus
-          git pull origin main
-          git push
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main || git rebase --abort
+            if git push origin main; then
+              echo "Push berhasil"
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
