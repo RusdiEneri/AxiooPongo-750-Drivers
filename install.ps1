@@ -173,8 +173,8 @@ foreach ($sp in $specialList) {
 
 if ($TouchpadOnly) {
     $selectedDrivers.AddRange($specialList)
-    $hidFilter = $manifest.drivers | Where-Object { $_.id -like "*hid-filter*" }
-    if ($hidFilter) { $selectedDrivers.Add($hidFilter) }
+    $hidFilter = @($manifest.drivers | Where-Object { $_.id -like "*hid-filter*" })
+    if ($hidFilter.Count -gt 0) { $selectedDrivers.AddRange($hidFilter) }
 }
 elseif ($All) {
     foreach ($d in $manifest.drivers) { $selectedDrivers.Add($d) }
@@ -209,8 +209,8 @@ else {
     switch ($choice) {
         "1" {
             $selectedDrivers.AddRange($specialList)
-            $hidFilter = $manifest.drivers | Where-Object { $_.id -like "*hid-filter*" }
-            if ($hidFilter) { $selectedDrivers.Add($hidFilter) }
+            $hidFilter = @($manifest.drivers | Where-Object { $_.id -like "*hid-filter*" })
+            if ($hidFilter.Count -gt 0) { $selectedDrivers.AddRange($hidFilter) }
         }
         "2" {
             $selectedDrivers.AddRange($specialList)
@@ -228,12 +228,27 @@ else {
         "4" {
             if ($ScriptDir -and (Test-Path (Join-Path $ScriptDir "detect.ps1"))) {
                 & (Join-Path $ScriptDir "detect.ps1")
+            } else {
+                $devs = Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue
+                $devs | Where-Object { $_.InstanceId -match '51E8|INTC1055|ELAN0412' -or $_.FriendlyName -match 'touch pad|I2C HID|Input Configuration' } | Format-Table InstanceId, FriendlyName, Status -AutoSize
             }
             exit 0
         }
         "5" {
             if ($ScriptDir -and (Test-Path (Join-Path $ScriptDir "verify.ps1"))) {
                 & (Join-Path $ScriptDir "verify.ps1")
+            } else {
+                $devs = Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue
+                $checks = @(
+                    @{ Name = "Intel Serial IO I2C";                  Hit = ($devs | Where-Object { $_.InstanceId -like "PCI\VEN_8086&DEV_51E8*"  -and $_.Status -eq "OK" }) }
+                    @{ Name = "Intel Serial IO GPIO";                 Hit = ($devs | Where-Object { $_.InstanceId -like "ACPI\INTC1055*"           -and $_.Status -eq "OK" }) }
+                    @{ Name = "I2C HID Device";                       Hit = ($devs | Where-Object { $_.FriendlyName -eq "I2C HID Device"           -and $_.Status -eq "OK" }) }
+                    @{ Name = "HID-compliant touch pad";              Hit = ($devs | Where-Object { $_.FriendlyName -eq "HID-compliant touch pad"  -and $_.Status -eq "OK" }) }
+                    @{ Name = "Microsoft Input Configuration Device"; Hit = ($devs | Where-Object { $_.FriendlyName -eq "Microsoft Input Configuration Device" -and $_.Status -eq "OK" }) }
+                )
+                foreach ($c in $checks) {
+                    if ($c.Hit) { Write-Host "[OK]   $($c.Name)" -ForegroundColor Green } else { Write-Host "[FAIL] $($c.Name)" -ForegroundColor Red }
+                }
             }
             exit 0
         }
@@ -283,7 +298,7 @@ try {
         Write-Host "  Mengunduh dari: $url" -ForegroundColor Yellow
         $downloadSuccess = $false
         
-        if ((Test-Path $cachedFile) -and (Get-Item $cachedFile).Length -gt 1MB) {
+        if ((Test-Path $cachedFile) -and (Get-Item $cachedFile).Length -gt 0) {
             Write-Host "  [CACHE] Ditemukan di cache lokal. Melewati unduhan..." -ForegroundColor Green
             Copy-Item $cachedFile $targetFile -Force
             $downloadSuccess = $true
@@ -292,7 +307,7 @@ try {
             for ($i = 1; $i -le $maxRetries; $i++) {
                 try {
                     Invoke-WebRequest -Uri $url -OutFile $targetFile -UseBasicParsing -Headers @{ "User-Agent" = "Mozilla/5.0" } -TimeoutSec 120
-                    if ((Test-Path $targetFile) -and (Get-Item $targetFile).Length -gt 1MB) {
+                    if ((Test-Path $targetFile) -and (Get-Item $targetFile).Length -gt 0) {
                         # Simpan ke cache persisten
                         Copy-Item $targetFile $cachedFile -Force -ErrorAction SilentlyContinue
                         $downloadSuccess = $true
