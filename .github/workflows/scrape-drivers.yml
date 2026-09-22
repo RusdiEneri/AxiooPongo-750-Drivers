@@ -2,12 +2,13 @@ name: Scrape Axioo Drivers
 
 on:
   workflow_dispatch:
-
   schedule:
     - cron: "0 * * * *"
   push:
+    branches:
+      - main # [KOREKSI 1] Batasi hanya di branch main
     paths:
-      -".github/workflows/scrape-drivers.yml"
+      - ".github/workflows/scrape-drivers.yml" # [KOREKSI 2] Tambah spasi setelah strip
 
 permissions:
   contents: write
@@ -19,11 +20,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # [KOREKSI 3] Tambahkan token agar permission push lebih kuat
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      # [CATATAN PENTING] 
+      # Jika script scrape-axioo.mjs menggunakan library (seperti puppeteer, axios, cheerio), 
+      # kamu WAJIB menambahkan step install di bawah ini. Kalau murni Node.js built-in, abaikan saja.
+      # - name: Install dependencies
+      #   run: npm ci
 
       - name: Run scraper
         run: node scripts/scrape-axioo.mjs
@@ -44,4 +54,8 @@ jobs:
           fi
 
           git commit -m "chore: update Axioo Pongo 750 driver metadata"
+          
+          # [KOREKSI 4] Cegah error 'rejected' jika ada workflow lain yang push berbarengan
+          git pull --rebase origin main
+          
           git push

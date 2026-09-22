@@ -11,6 +11,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,51 +24,25 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup git config
+      - name: Setup git and branch tracking
         run: |
           git config user.name 'RusdiEneri'
           git config user.email 'nuruddinrusydiilham@gmail.com'
+          git config pull.rebase true
+          # Menggunakan variabel dinamis agar bisa dipakai di repo manapun
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git checkout -B main origin/main
+
+      - name: Create 5 Commits and Push
+        run: |
+          # Loop untuk membuat 5 commit
+          for i in 1 2 3 4 5; do
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit $i" >> log.txt
+            git add log.txt
+            git commit -m "Log commit $i - $(date '+%Y-%m-%d %H:%M:%S')"
+            sleep 1 # Jeda 1 detik agar timestamp di file log.txt berbeda detik
+          done
           
-      - name: Configure Git Remote with Token
-        run: |
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RusdiEneri/AxiooPongo-750-Drivers.git
-
-      # Commit 1
-      - name: Commit 1
-        run: |
-          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 1" >> log.txt
-          git add log.txt
-          git commit -m "Log commit 1 - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
-
-      # Commit 2
-      - name: Commit 2
-        run: |
-          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 2" >> log.txt
-          git add log.txt
-          git commit -m "Log commit 2 - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
-
-      # Commit 3
-      - name: Commit 3
-        run: |
-          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 3" >> log.txt
-          git add log.txt
-          git commit -m "Log commit 3 - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
-
-      # Commit 4
-      - name: Commit 4
-        run: |
-          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 4" >> log.txt
-          git add log.txt
-          git commit -m "Log commit 4 - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
-
-      # Commit 5
-      - name: Commit 5
-        run: |
-          echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit 5" >> log.txt
-          git add log.txt
-          git commit -m "Log commit 5 - $(date '+%Y-%m-%d %H:%M:%S')"
+          # Tarik perubahan terbaru dari remote, lalu push sekaligus
+          git pull origin main
           git push
