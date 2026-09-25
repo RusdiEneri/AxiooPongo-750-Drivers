@@ -3,8 +3,7 @@ name: Scrape Axioo Drivers
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */12 * * *"
-      timezone: 'Asia/Jakarta'
+    - cron: "0 * * * *"
   push:
     paths:
       - ".github/workflows/scrape-drivers.yml"
