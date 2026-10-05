@@ -1,9 +1,11 @@
-name: Scrape Axioo Drivers
+name: "Scrape Axioo Drivers"
 
 on:
   workflow_dispatch:
+
   schedule:
     - cron: "0 * * * *"
+
   push:
     paths:
       - ".github/workflows/scrape-drivers.yml"
@@ -18,39 +20,196 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
-      - name: Checkout
+      - name: "Checkout"
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          persist-credentials: true
 
-      - name: Setup Node.js
+      - name: "Setup Node.js"
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Run scraper
-        run: node scripts/scrape-axioo.mjs
-
-      - name: Commit and push (anti-rejected)
+      - name: "Run scraper"
+        shell: bash
         run: |
-          git config user.name "RusdiEneri"
-          git config user.email "nuruddinrusydiilham@gmail.com"
-          git add generated/drivers.json generated/version.json
+          set -Eeuo pipefail
+
+          node scripts/scrape-axioo.mjs
+
+      - name: "Commit and Push Verified"
+        env:
+          SIGNING_KEY: ${{ secrets.COMMIT_SIGNING_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          # ==========================================
+          # 1. Validasi signing key
+          # ==========================================
+          if [[ -z "${SIGNING_KEY:-}" ]]; then
+            echo "::error::Secret COMMIT_SIGNING_KEY tidak ditemukan atau kosong."
+            exit 1
+          fi
+
+          # ==========================================
+          # 2. Pastikan branch lokal sinkron
+          # ==========================================
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          # ==========================================
+          # 3. Siapkan SSH signing key
+          # ==========================================
+          KEY_DIR="${RUNNER_TEMP}/git-signing"
+          PRIVATE_KEY="${KEY_DIR}/signing_key"
+          PUBLIC_KEY="${KEY_DIR}/signing_key.pub"
+          ALLOWED_SIGNERS="${KEY_DIR}/allowed_signers"
+
+          mkdir -p "$KEY_DIR"
+          chmod 700 "$KEY_DIR"
+
+          printf '%s\n' "$SIGNING_KEY" > "$PRIVATE_KEY"
+          chmod 600 "$PRIVATE_KEY"
+
+          # Buat public key dari private key
+          ssh-keygen -y \
+            -f "$PRIVATE_KEY" \
+            > "$PUBLIC_KEY"
+
+          chmod 644 "$PUBLIC_KEY"
+
+          if [[ ! -s "$PUBLIC_KEY" ]]; then
+            echo "::error::Gagal membuat public signing key."
+            exit 1
+          fi
+
+          # ==========================================
+          # 4. Jalankan ssh-agent
+          # ==========================================
+          eval "$(ssh-agent -s)"
+
+          ssh-add "$PRIVATE_KEY"
+
+          # ==========================================
+          # 5. Configure Git identity
+          # ==========================================
+          git config --local user.name "RusdiEneri"
+          git config --local user.email "nuruddinrusydiilham@gmail.com"
+
+          # ==========================================
+          # 6. Configure SSH commit signing
+          # ==========================================
+          git config --local gpg.format ssh
+          git config --local gpg.ssh.program ssh-keygen
+
+          # Gunakan public key sebagai signing key.
+          # Private key tersedia melalui ssh-agent.
+          PUBLIC_KEY_DATA="$(cat "$PUBLIC_KEY")"
+
+          git config --local \
+            user.signingkey \
+            "key::${PUBLIC_KEY_DATA}"
+
+          git config --local commit.gpgsign true
+
+          # ==========================================
+          # 7. Allowed signers untuk verifikasi lokal
+          # ==========================================
+          printf '%s %s\n' \
+            "nuruddinrusydiilham@gmail.com" \
+            "$PUBLIC_KEY_DATA" \
+            > "$ALLOWED_SIGNERS"
+
+          chmod 644 "$ALLOWED_SIGNERS"
+
+          git config --local \
+            gpg.ssh.allowedSignersFile \
+            "$ALLOWED_SIGNERS"
+
+          echo "✅ Git signing configuration selesai."
+
+          # ==========================================
+          # 8. Stage hasil scraper
+          # ==========================================
+          git add \
+            generated/drivers.json \
+            generated/version.json
+
           if git diff --cached --quiet; then
-            echo "Tidak ada perubahan data."
+            echo "ℹ️ Tidak ada perubahan data."
             exit 0
           fi
-          git commit -m "chore: update Axioo Pongo 750 driver metadata"
+
+          # ==========================================
+          # 9. Buat signed commit
+          # ==========================================
+          COMMIT_TIME="$(TZ=Asia/Jakarta date '+%Y%m%d-%H%M')"
+
+          git commit -S \
+            -m "chore: update Axioo Pongo 750 driver metadata [${COMMIT_TIME}]"
+
+          echo
+          echo "✅ Signed commit berhasil dibuat."
+
+          # ==========================================
+          # 10. Verifikasi signature lokal
+          # ==========================================
+          echo
+          echo "🔏 Verifying commit signature..."
+
+          git verify-commit HEAD
+
+          echo
+          echo "✅ Signature valid."
+
+          # ==========================================
+          # 11. Push dengan retry
+          # ==========================================
           for attempt in 1 2 3 4 5; do
-            git pull --rebase origin main || git rebase --abort
-            if git push origin main; then
-              echo "Push berhasil (percobaan ke-$attempt)"
+            echo
+            echo "========================================"
+            echo "🚀 Push attempt ${attempt}/5"
+            echo "========================================"
+
+            # Coba push terlebih dahulu
+            if git push origin HEAD:main; then
+              echo "✅ Push berhasil."
               exit 0
             fi
-            echo "Push ditolak, coba lagi 10 detik..."
-            sleep 10
+
+            echo "⚠️ Push ditolak. Remote kemungkinan berubah."
+
+            if [[ "$attempt" -eq 5 ]]; then
+              break
+            fi
+
+            # Ambil perubahan remote
+            echo "🔄 Fetch origin/main..."
+            git fetch origin main
+
+            # Rebase sekaligus tanda tangani ulang
+            echo "🔐 Rebase + sign ulang commit..."
+            git rebase --gpg-sign origin/main
+
+            # Verifikasi ulang signature
+            echo
+            echo "🔏 Verifying rebased commit..."
+
+            git verify-commit HEAD
+
+            echo
+            echo "✅ Commit setelah rebase tetap signed."
+            echo "⏳ Menunggu 5 detik..."
+            sleep 5
           done
-          echo "Gagal push setelah 5 percobaan"
+
+          echo "::error::Gagal push setelah 5 percobaan."
           exit 1
